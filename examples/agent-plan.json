@@ -1,0 +1,95 @@
+{
+  "root": "card",
+  "elements": {
+    "card": {
+      "type": "Card",
+      "props": { "title": "Agent plan · request timeouts", "padding": 1 },
+      "children": ["heading", "status", "meta", "plan-section", "verify-section", "gate"]
+    },
+    "heading": {
+      "type": "Heading",
+      "props": { "text": "Add configurable API request timeouts", "level": "h2", "color": "cyan" },
+      "children": []
+    },
+    "status": {
+      "type": "StatusLine",
+      "props": { "text": "Ready to execute · five focused phases", "status": "info" },
+      "children": []
+    },
+    "meta": {
+      "type": "Box",
+      "props": { "flexDirection": "row", "gap": 2 },
+      "children": ["files", "risk", "effort"]
+    },
+    "files": {
+      "type": "Metric",
+      "props": { "label": "Expected files", "value": "4", "detail": "small diff" },
+      "children": []
+    },
+    "risk": {
+      "type": "Metric",
+      "props": { "label": "Risk", "value": "Medium", "detail": "network edge" },
+      "children": []
+    },
+    "effort": {
+      "type": "Metric",
+      "props": { "label": "Estimate", "value": "45 min", "detail": "including tests" },
+      "children": []
+    },
+    "plan-section": {
+      "type": "Box",
+      "props": { "flexDirection": "column" },
+      "children": ["plan-divider", "steps"]
+    },
+    "plan-divider": {
+      "type": "Divider",
+      "props": { "title": "Execution" },
+      "children": []
+    },
+    "steps": {
+      "type": "List",
+      "props": {
+        "ordered": true,
+        "items": [
+          "Reproduce the hanging request with a focused failing test.",
+          "Trace configuration flow from environment to HTTP client.",
+          "Add a bounded timeout with a backward-compatible default.",
+          "Map timeout failures to the existing typed error boundary.",
+          "Run focused tests, typecheck, and the integration suite."
+        ]
+      },
+      "children": []
+    },
+    "verify-section": {
+      "type": "Box",
+      "props": { "flexDirection": "column" },
+      "children": ["verify-heading", "checks"]
+    },
+    "verify-heading": {
+      "type": "Heading",
+      "props": { "text": "Verification gates", "level": "h3" },
+      "children": []
+    },
+    "checks": {
+      "type": "Table",
+      "props": {
+        "columns": [
+          { "header": "Gate", "key": "gate", "width": 18 },
+          { "header": "Command", "key": "command", "width": 28 },
+          { "header": "Expected", "key": "expected", "width": 18 }
+        ],
+        "rows": [
+          { "gate": "Regression", "command": "npm test -- timeout", "expected": "Pass" },
+          { "gate": "Types", "command": "npm run typecheck", "expected": "No errors" },
+          { "gate": "Integration", "command": "npm test", "expected": "Green suite" }
+        ]
+      },
+      "children": []
+    },
+    "gate": {
+      "type": "Callout",
+      "props": { "type": "important", "title": "Stop condition", "content": "Do not widen the retry policy or change unrelated network behavior." },
+      "children": []
+    }
+  }
+}

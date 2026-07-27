@@ -1,0 +1,91 @@
+{
+  "root": "card",
+  "elements": {
+    "card": {
+      "type": "Card",
+      "props": { "title": "Release control · 2026.07", "padding": 1 },
+      "children": ["heading", "status", "metrics", "rollout-section", "services-section", "next"]
+    },
+    "heading": {
+      "type": "Heading",
+      "props": { "text": "Production deployment", "level": "h2", "color": "cyan" },
+      "children": []
+    },
+    "status": {
+      "type": "StatusLine",
+      "props": { "text": "Healthy across all regions", "status": "success" },
+      "children": []
+    },
+    "metrics": {
+      "type": "Box",
+      "props": { "flexDirection": "row", "gap": 2 },
+      "children": ["instances", "latency", "errors"]
+    },
+    "instances": {
+      "type": "Metric",
+      "props": { "label": "Instances", "value": "12 / 12", "detail": "healthy" },
+      "children": []
+    },
+    "latency": {
+      "type": "Metric",
+      "props": { "label": "p95 latency", "value": "82 ms", "detail": "8% faster", "trend": "neutral" },
+      "children": []
+    },
+    "errors": {
+      "type": "Metric",
+      "props": { "label": "Error rate", "value": "0.03%", "detail": "stable", "trend": "neutral" },
+      "children": []
+    },
+    "rollout-section": {
+      "type": "Box",
+      "props": { "flexDirection": "column" },
+      "children": ["rollout-divider", "rollout", "traffic"]
+    },
+    "rollout-divider": {
+      "type": "Divider",
+      "props": { "title": "Rollout" },
+      "children": []
+    },
+    "rollout": {
+      "type": "ProgressBar",
+      "props": { "label": "Fleet", "progress": 0.75, "width": 28, "color": "green" },
+      "children": []
+    },
+    "traffic": {
+      "type": "Sparkline",
+      "props": { "label": "Traffic", "data": [18, 22, 21, 28, 35, 33, 42, 48, 46, 55, 61, 64], "width": 28, "color": "cyan" },
+      "children": []
+    },
+    "services-section": {
+      "type": "Box",
+      "props": { "flexDirection": "column" },
+      "children": ["services-heading", "services"]
+    },
+    "services-heading": {
+      "type": "Heading",
+      "props": { "text": "Services", "level": "h3" },
+      "children": []
+    },
+    "services": {
+      "type": "Table",
+      "props": {
+        "columns": [
+          { "header": "Service", "key": "service", "width": 18 },
+          { "header": "Region", "key": "region", "width": 14 },
+          { "header": "State", "key": "state", "width": 14 }
+        ],
+        "rows": [
+          { "service": "API", "region": "global", "state": "Healthy" },
+          { "service": "Worker", "region": "eu-west", "state": "Deploying" },
+          { "service": "Sockets", "region": "us-east", "state": "Healthy" }
+        ]
+      },
+      "children": []
+    },
+    "next": {
+      "type": "Callout",
+      "props": { "type": "tip", "title": "Next gate", "content": "Promote the remaining 25% after ten clean minutes." },
+      "children": []
+    }
+  }
+}

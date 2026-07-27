@@ -1,0 +1,96 @@
+{
+  "root": "card",
+  "elements": {
+    "card": {
+      "type": "Card",
+      "props": { "title": "Detailed agent plan · configurable request timeouts", "padding": 1 },
+      "children": ["heading", "status", "files-section", "flow-section", "schema-section", "verification"]
+    },
+    "heading": {
+      "type": "Heading",
+      "props": { "text": "Bound every outbound request and preserve typed failures", "level": "h2", "color": "cyan" },
+      "children": []
+    },
+    "status": {
+      "type": "StatusLine",
+      "props": { "text": "Plan ready · implementation starts with a failing timeout reproducer", "status": "info" },
+      "children": []
+    },
+    "files-section": {
+      "type": "Box",
+      "props": { "flexDirection": "column" },
+      "children": ["files-heading", "files"]
+    },
+    "files-heading": {
+      "type": "Heading",
+      "props": { "text": "File-level implementation", "level": "h3" },
+      "children": []
+    },
+    "files": {
+      "type": "Table",
+      "props": {
+        "columns": [
+          { "header": "Path", "key": "path", "width": 38 },
+          { "header": "Change", "key": "change", "width": 44 },
+          { "header": "Verification", "key": "verification", "width": 28 }
+        ],
+        "rows": [
+          { "path": "src/config/request-policy.ts", "change": "Parse timeoutMs; apply a bounded default.", "verification": "Unit tests for bounds/default" },
+          { "path": "src/http/create-client.ts", "change": "Attach AbortSignal.timeout to each request.", "verification": "Fake-timer client test" },
+          { "path": "src/errors/timeout-error.ts", "change": "Introduce a typed TimeoutError with duration.", "verification": "Serialization contract test" },
+          { "path": "src/controllers/request-controller.ts", "change": "Map TimeoutError to the existing 504 response.", "verification": "Controller integration test" },
+          { "path": "test/request-timeout.test.ts", "change": "Reproduce a non-responsive upstream request.", "verification": "Fails before implementation" }
+        ]
+      },
+      "children": []
+    },
+    "flow-section": {
+      "type": "Box",
+      "props": { "flexDirection": "column" },
+      "children": ["flow-heading", "flow"]
+    },
+    "flow-heading": {
+      "type": "Heading",
+      "props": { "text": "Information flow", "level": "h3" },
+      "children": []
+    },
+    "flow": {
+      "type": "Text",
+      "props": {
+        "text": "env/config ── timeoutMs ──▶ request policy ──▶ HTTP client ──▶ upstream API\nAPI 504 ◀── request controller ◀── typed TimeoutError ◀─────┘ timeout",
+        "color": "white"
+      },
+      "children": []
+    },
+    "schema-section": {
+      "type": "Box",
+      "props": { "flexDirection": "column" },
+      "children": ["schema-heading", "schemas"]
+    },
+    "schema-heading": {
+      "type": "Heading",
+      "props": { "text": "Database schemas introduced", "level": "h3" },
+      "children": []
+    },
+    "schemas": {
+      "type": "Table",
+      "props": {
+        "columns": [
+          { "header": "Table", "key": "table", "width": 24 },
+          { "header": "Columns", "key": "columns", "width": 58 },
+          { "header": "Purpose", "key": "purpose", "width": 28 }
+        ],
+        "rows": [
+          { "table": "request_policy", "columns": "id uuid PK · org_id uuid · timeout_ms int · created_at timestamptz", "purpose": "Per-org timeout policy" },
+          { "table": "request_attempt", "columns": "id uuid PK · policy_id uuid FK · outcome text · elapsed_ms int", "purpose": "Timeout observability" }
+        ]
+      },
+      "children": []
+    },
+    "verification": {
+      "type": "Callout",
+      "props": { "type": "important", "title": "Verification and stop condition", "content": "Run focused tests, typecheck, and integration tests. Do not change retries or unrelated network behavior." },
+      "children": []
+    }
+  }
+}

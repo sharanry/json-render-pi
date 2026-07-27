@@ -51,6 +51,38 @@ Rendering is parent-width-aware. Long text wraps with ANSI styling preserved,
 table cells wrap within their columns, and row boxes retain multi-line child
 alignment.
 
+## Standalone visual development loop
+
+Validate and render without invoking a model or starting Pi:
+
+```bash
+npm run ui:dev -- examples/deployment-status.json \
+  --width 80 \
+  --ascii .artifacts/deployment-status.txt \
+  --png .artifacts/deployment-status.png \
+  --report .artifacts/deployment-status.report.json \
+  --strict
+```
+
+The harness uses the same validator and renderer as the extension, prints an
+ANSI terminal preview, runs design heuristics, and can write ASCII, SVG, PNG,
+and JSON reports. PNG screenshots open automatically in macOS Preview. Pass
+`--no-open` only for CI or automated tests.
+
+Use watch mode for a short edit–inspect–iterate loop:
+
+```bash
+npm run ui:dev -- examples/agent-plan.json \
+  --watch \
+  --width 80 \
+  --png .artifacts/agent-plan.png \
+  --strict
+```
+
+Run `npm run ui:dev -- --help` for every option. Curated examples include a
+production deployment dashboard, a compact coding-task plan, and a detailed
+120-column plan with file paths, information flow, and proposed database schemas.
+
 ## Develop
 
 ```bash
@@ -58,9 +90,9 @@ npm test
 npm run typecheck
 ```
 
-The tests include regressions for malformed callouts, tables, and lists from a
-real Pi session; schema exposure; complexity budgets; nested wrapping; stable
-row layout; theme slots; and package skill discovery.
+The tests include regressions for malformed generated specs, schema exposure,
+complexity budgets, nested wrapping, row layout, snapshot generation, design
+auditing, the complete CLI workflow, and package skill discovery.
 
 ## License
 

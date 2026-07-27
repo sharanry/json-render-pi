@@ -93,6 +93,23 @@ A callout uses `type` and `content`, not `variant` and `text`:
 }
 ```
 
+## Coding-plan layouts
+
+For a compact plan, show scope/risk metrics, an ordered `List` of execution
+phases, a verification `Table`, and a stop-condition `Callout`. For a detailed
+plan, add:
+
+- a file-level `Table` with `Path`, `Change`, and `Verification` columns;
+- a multiline `Text` element containing a compact ASCII information-flow
+  diagram; and
+- a database `Table` with `Table`, `Columns`, and `Purpose` columns when the
+  task actually introduces or changes persistence.
+
+Use real project-relative file paths after inspecting the repository. Clearly
+label proposed schemas and do not invent database changes merely to fill the
+layout. Detailed plans are best rendered around 120 columns; compact plans must
+remain useful at 80 columns.
+
 ## Workflow
 
 1. Summarize the information into a compact visual hierarchy.
