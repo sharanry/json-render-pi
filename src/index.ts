@@ -24,6 +24,7 @@ export default function jsonRenderPi(pi: ExtensionAPI) {
   pi.registerTool({
     name: TOOL_NAME,
     label: "Render JSON UI",
+    renderShell: "self",
     description: "Render a constrained, read-only json-render UI in Pi's native terminal transcript. Supported components: " + supportedComponentNames.join(", ") + ". The schema rejects unsupported props, controls, actions, and oversized layouts.",
     promptSnippet: "Render a safe, read-only json-render Ink specification in Pi's terminal transcript",
     promptGuidelines: [
@@ -44,7 +45,9 @@ export default function jsonRenderPi(pi: ExtensionAPI) {
     },
     renderCall(args, theme) {
       const title = typeof args.title === "string" && args.title.trim() ? args.title : "json-render UI";
-      return new StaticLines([theme.fg("toolTitle", theme.bold("Render JSON UI")), theme.fg("muted", title)]);
+      return new StaticLines([
+        `${theme.fg("dim", "json ui")}${theme.fg("muted", ` · ${title}`)}`,
+      ]);
     },
     renderResult(result, _options, theme) {
       const details = result.details as JsonRenderResultDetails | undefined;

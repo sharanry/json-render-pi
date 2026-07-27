@@ -49,7 +49,8 @@ to work in a static transcript.
 
 Rendering is parent-width-aware. Long text wraps with ANSI styling preserved,
 table cells wrap within their columns, and row boxes retain multi-line child
-alignment.
+alignment. The tool uses Pi's self-rendering shell so the UI stays on the normal
+terminal background instead of inheriting the green `toolSuccessBg` surface.
 
 ## Standalone visual development loop
 
