@@ -7,7 +7,9 @@ import { ansiTheme } from "../src/dev/snapshot.ts";
 import { renderSpec } from "../src/renderer.ts";
 import { validateSpec } from "../src/spec.ts";
 
-for (const [name, width] of [["deployment-status", 80], ["agent-plan", 80], ["detailed-agent-plan", 120]] as const) {
+const examples = [["deployment-status", 80], ["agent-plan", 80], ["detailed-agent-plan", 120]] as const;
+
+for (const [name, width] of examples) {
   test(`curated ${name} example validates and passes its design audit`, async () => {
     const input = JSON.parse(
       await readFile(new URL(`../examples/${name}.json`, import.meta.url), "utf8"),
@@ -21,3 +23,14 @@ for (const [name, width] of [["deployment-status", 80], ["agent-plan", 80], ["de
     assert.ok(lines.length <= (width >= 120 ? 36 : 24));
   });
 }
+
+test("README embeds a valid PNG snapshot for every curated example", async () => {
+  const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
+
+  for (const [name] of examples) {
+    const png = await readFile(new URL(`../docs/images/${name}.png`, import.meta.url));
+    assert.deepEqual([...png.subarray(0, 8)], [137, 80, 78, 71, 13, 10, 26, 10]);
+    assert.match(readme, new RegExp(`docs/images/${name}\\.png`));
+    assert.match(readme, new RegExp(`examples/${name}\\.json`));
+  }
+});
