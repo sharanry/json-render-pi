@@ -1,12 +1,6 @@
 # json-render for Pi
 
-Turn dense agent output into compact, scannable terminal UI.
-
-Instead of parsing long blocks of prose, you can see plans, deployment status,
-progress, comparisons, tables, checklists, and metrics at a glance—directly in
-Pi's conversation.
-
-<img src="docs/images/announcement.png" alt="json-render for Pi turns dense agent prose into a structured plan with visible scope, risk, verification, and progress" width="1200">
+<img src="docs/images/announcement.png" alt="Turn dense agent output into compact, scannable terminal UI. Instead of parsing long blocks of prose, you can see plans, deployment status, progress, comparisons, tables, checklists, and metrics at a glance—directly in Pi's conversation." width="1200">
 
 ## Install in Pi
 
