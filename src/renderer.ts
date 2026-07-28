@@ -152,9 +152,9 @@ function renderLeaf(element: Exclude<JsonRenderElement, { type: "Box" | "Card" }
 function renderHeading(props: Record<string, unknown>, theme: JsonRenderTheme): string {
   const text = stringProp(props, "text");
   switch (stringProp(props, "level", "h2")) {
-    case "h1": return theme.bold(theme.accent(text));
-    case "h3": return theme.bold(theme.muted(text));
-    case "h4": return theme.muted(text);
+    case "h1": return `${theme.accent("▰")} ${theme.bold(theme.accent(text))}`;
+    case "h3": return `${theme.accent("◆")} ${theme.bold(text)}`;
+    case "h4": return `${theme.muted("›")} ${theme.bold(theme.muted(text))}`;
     default: return theme.bold(text);
   }
 }
@@ -227,9 +227,9 @@ function renderTable(props: Record<string, unknown>, width: number, theme: JsonR
   let spare = Math.max(0, available - used);
   widths = widths.map((item) => item + (spare-- > 0 ? 1 : 0));
 
-  const headerValues = columns.map((column) => stringProp(column, "header"));
-  const output = [theme.bold(renderTableLine(headerValues, columns, widths))];
-  output.push(theme.dim(widths.map((columnWidth) => "─".repeat(columnWidth)).join("─")));
+  const headerValues = columns.map((column) => theme.accent(theme.bold(stringProp(column, "header"))));
+  const output = [renderTableLine(headerValues, columns, widths, theme)];
+  output.push(theme.dim(widths.map((columnWidth) => "─".repeat(columnWidth)).join("┼")));
 
   for (const row of rows) {
     const cellLines = columns.map((column, index) =>
@@ -238,16 +238,16 @@ function renderTable(props: Record<string, unknown>, width: number, theme: JsonR
     const height = Math.max(...cellLines.map((cell) => cell.length));
     for (let lineIndex = 0; lineIndex < height; lineIndex++) {
       const values = cellLines.map((cell) => cell[lineIndex] ?? "");
-      output.push(renderTableLine(values, columns, widths));
+      output.push(renderTableLine(values, columns, widths, theme));
     }
   }
   return output;
 }
 
-function renderTableLine(values: string[], columns: Record<string, unknown>[], widths: number[]): string {
+function renderTableLine(values: string[], columns: Record<string, unknown>[], widths: number[], theme: JsonRenderTheme): string {
   return values.map((value, index) =>
     align(value, widths[index]!, stringProp(columns[index]!, "align", "left")),
-  ).join(" ");
+  ).join(theme.muted("│"));
 }
 
 function renderList(props: Record<string, unknown>, width: number, theme: JsonRenderTheme): string[] {
@@ -259,7 +259,7 @@ function renderList(props: Record<string, unknown>, width: number, theme: JsonRe
     const marker = ordered ? `${index + 1}.` : bullet;
     const contentWidth = Math.max(1, width - visibleWidth(marker) - 1);
     return wrap(item, contentWidth).map((line, lineIndex) =>
-      `${lineIndex === 0 ? marker : " ".repeat(visibleWidth(marker))} ${line}`,
+      `${lineIndex === 0 ? theme.accent(marker) : " ".repeat(visibleWidth(marker))} ${line}`,
     );
   });
   return joinVertical(blocks, spacing);
@@ -294,12 +294,14 @@ function renderMetric(props: Record<string, unknown>, width: number, theme: Json
 function renderCallout(props: Record<string, unknown>, width: number, theme: JsonRenderTheme): string[] {
   const type = stringProp(props, "type", "info");
   const title = stringProp(props, "title", type.toUpperCase());
-  const marker = styleForVariant(type === "tip" ? "success" : type, "│", theme);
+  const variant = type === "tip" ? "success" : type;
+  const icon = type === "important" ? "◆" : type === "warning" ? "▲" : type === "tip" ? "✓" : "●";
+  const marker = styleForVariant(variant, "│", theme);
   const prefixWidth = visibleWidth(marker) + 1;
   const contentWidth = Math.max(1, width - prefixWidth);
-  const titleLines = title ? wrap(theme.bold(title), contentWidth) : [];
-  const contentLines = wrap(stringProp(props, "content"), contentWidth);
-  return [...titleLines, ...contentLines].map((line) => `${marker} ${line}`);
+  const titleLines = title ? wrap(`${styleForVariant(variant, icon, theme)} ${styleForVariant(variant, theme.bold(title), theme)}`, contentWidth) : [];
+  const contentLines = wrap(stringProp(props, "content"), contentWidth).map((line) => `${marker} ${line}`);
+  return [...titleLines, ...contentLines];
 }
 
 function styleText(text: string, props: Record<string, unknown>, theme: JsonRenderTheme): string {

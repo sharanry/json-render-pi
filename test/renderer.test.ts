@@ -160,7 +160,7 @@ test("renders valid callout, table, and list contracts without empty placeholder
   const validatedSpec = requireValidSpec(spec);
   const output = renderSpec(validatedSpec, 60, plainTheme).join("\n");
   assert.match(output, /Use the current stack/);
-  assert.match(output, /SO2\s+Current default/);
+  assert.match(output, /SO2\s+│Current default/);
   assert.match(output, /1\. Use Bun/);
   assert.doesNotMatch(output, /\(empty table\)/);
 });
@@ -201,6 +201,35 @@ test("renders a nested dashboard with semantic Pi theme slots", () => {
   assert.match(output, /<bold>Production<\/bold>/);
   assert.match(output, /<success>████<\/success>/);
   assert.match(output, /8 of 16 instances healthy/);
+});
+
+test("gives component types distinct visual signatures and semantic styling", () => {
+  const result = renderSpec(
+    {
+      root: "layout",
+      elements: {
+        layout: { type: "Box", props: { flexDirection: "column" }, children: ["section", "list", "table", "note"] },
+        section: { type: "Heading", props: { text: "Services", level: "h3" }, children: [] },
+        list: { type: "List", props: { items: ["Ship it"] }, children: [] },
+        table: {
+          type: "Table",
+          props: {
+            columns: [{ header: "State", key: "state", width: 12 }, { header: "Owner", key: "owner", width: 12 }],
+            rows: [{ state: "Healthy", owner: "Platform" }],
+          },
+          children: [],
+        },
+        note: { type: "Callout", props: { type: "warning", title: "Watch", content: "Latency is rising." }, children: [] },
+      },
+    },
+    100,
+    theme,
+  ).join("\n");
+
+  assert.match(result, /<accent>◆<\/accent> <bold>Services<\/bold>/);
+  assert.match(result, /<accent>•<\/accent> Ship it/);
+  assert.match(result, /<muted>│<\/muted>/);
+  assert.match(result, /<warning>▲<\/warning> <warning><bold>Watch<\/bold><\/warning>/);
 });
 
 test("renders rows horizontally and fits every line within the requested width", () => {
