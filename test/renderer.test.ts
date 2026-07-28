@@ -17,7 +17,7 @@ const theme = {
 };
 
 test("validateSpec accepts a constrained JSON Render element tree", () => {
-  const result = validateSpec({
+  const spec = requireValidSpec({
     root: "layout",
     elements: {
       layout: { type: "Box", props: { flexDirection: "column" }, children: ["title"] },
@@ -25,8 +25,7 @@ test("validateSpec accepts a constrained JSON Render element tree", () => {
     },
   });
 
-  assert.equal(result.ok, true);
-  if (result.ok) assert.equal(result.spec.root, "layout");
+  assert.equal(spec.root, "layout");
 });
 
 test("validateSpec reports missing child references", () => {
@@ -41,42 +40,57 @@ test("validateSpec reports missing child references", () => {
   if (!result.ok) assert.match(result.error, /absent/);
 });
 
-test("rejects malformed component props from the reported session", () => {
-  const callout = validateSpec({
-    root: "purpose",
-    elements: {
-      purpose: {
-        type: "Callout",
-        props: { variant: "info", title: "Purpose", text: "Wrong keys" },
-        children: [],
+const malformedComponentCases = [
+  {
+    name: "Callout without content",
+    spec: {
+      root: "purpose",
+      elements: {
+        purpose: {
+          type: "Callout",
+          props: { variant: "info", title: "Purpose", text: "Wrong keys" },
+          children: [],
+        },
       },
     },
-  });
-  const table = validateSpec({
-    root: "modes",
-    elements: {
-      modes: {
-        type: "Table",
-        props: { columns: ["Area", "Meaning"], data: [["SO2", "Default"]] },
-        children: [],
+    error: /Element "purpose" \(Callout\) props\.content/,
+  },
+  {
+    name: "Table with string columns",
+    spec: {
+      root: "modes",
+      elements: {
+        modes: {
+          type: "Table",
+          props: { columns: ["Area", "Meaning"], data: [["SO2", "Default"]] },
+          children: [],
+        },
       },
     },
-  });
-  const list = validateSpec({
-    root: "items",
-    elements: {
-      items: { type: "List", props: {}, children: ["item"] },
-      item: { type: "ListItem", props: { text: "Wrong shape" }, children: [] },
+    error: /Element "modes" \(Table\) props\.columns\.0/,
+  },
+  {
+    name: "List without items",
+    spec: {
+      root: "items",
+      elements: {
+        items: { type: "List", props: {}, children: ["item"] },
+        item: { type: "ListItem", props: { text: "Wrong shape" }, children: [] },
+      },
     },
-  });
+    error: /Element "items" \(List\) props\.items/,
+  },
+] as const;
 
-  assert.equal(callout.ok, false);
-  assert.equal(table.ok, false);
-  assert.equal(list.ok, false);
-  if (!callout.ok) assert.match(callout.error, /Callout.*content|variant|text/);
-  if (!table.ok) assert.match(table.error, /Table.*columns|rows|data/);
-  if (!list.ok) assert.match(list.error, /List.*items|children/);
-});
+for (const { name, spec, error } of malformedComponentCases) {
+  test(`validateSpec rejects ${name}`, () => {
+    const result = validateSpec(spec);
+
+    assert.equal(result.ok, false);
+    if (result.ok) assert.fail("Malformed spec unexpectedly passed validation");
+    assert.match(result.error, error);
+  });
+}
 
 test("rejects oversized specs before they reach the transcript", () => {
   const elements: Record<string, unknown> = Object.fromEntries(
@@ -120,11 +134,8 @@ test("renders valid callout, table, and list contracts without empty placeholder
       steps: { type: "List" as const, props: { items: ["Use Bun", "Run tests"], ordered: true }, children: [] },
     },
   };
-  const validation = validateSpec(spec);
-
-  assert.equal(validation.ok, true);
-  if (!validation.ok) return;
-  const output = renderSpec(validation.spec, 60, plainTheme).join("\n");
+  const validatedSpec = requireValidSpec(spec);
+  const output = renderSpec(validatedSpec, 60, plainTheme).join("\n");
   assert.match(output, /Use the current stack/);
   assert.match(output, /SO2\s+Current default/);
   assert.match(output, /1\. Use Bun/);
@@ -162,10 +173,11 @@ test("renders a nested dashboard with semantic Pi theme slots", () => {
     theme,
   );
 
-  assert.match(result.join("\n"), /Deploy status/);
-  assert.match(result.join("\n"), /<bold>Production<\/bold>/);
-  assert.match(result.join("\n"), /<success>████<\/success>/);
-  assert.match(result.join("\n"), /8 of 16 instances healthy/);
+  const output = result.join("\n");
+  assert.match(output, /Deploy status/);
+  assert.match(output, /<bold>Production<\/bold>/);
+  assert.match(output, /<success>████<\/success>/);
+  assert.match(output, /8 of 16 instances healthy/);
 });
 
 test("renders rows horizontally and fits every line within the requested width", () => {
@@ -246,6 +258,12 @@ const plainTheme = {
   bold: (text: string) => text,
   italic: (text: string) => text,
 };
+
+function requireValidSpec(input: unknown) {
+  const result = validateSpec(input);
+  if (!result.ok) assert.fail(`Expected a valid spec: ${result.error}`);
+  return result.spec;
+}
 
 function visibleLength(value: string): number {
   return value.replace(/<\/?[a-z]+>/g, "").length;

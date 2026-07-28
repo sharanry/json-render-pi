@@ -14,12 +14,10 @@ for (const [name, width] of examples) {
     const input = JSON.parse(
       await readFile(new URL(`../examples/${name}.json`, import.meta.url), "utf8"),
     );
-    const validation = validateSpec(input);
+    const spec = requireValidSpec(input);
+    const lines = renderSpec(spec, width, ansiTheme);
 
-    assert.equal(validation.ok, true);
-    if (!validation.ok) return;
-    const lines = renderSpec(validation.spec, width, ansiTheme);
-    assert.deepEqual(auditDesign(validation.spec, lines, width), []);
+    assert.deepEqual(auditDesign(spec, lines, width), []);
     assert.ok(lines.length <= (width >= 120 ? 36 : 24));
   });
 }
@@ -34,3 +32,9 @@ test("README embeds a valid PNG snapshot for every curated example", async () =>
     assert.match(readme, new RegExp(`examples/${name}\\.json`));
   }
 });
+
+function requireValidSpec(input: unknown) {
+  const result = validateSpec(input);
+  if (!result.ok) assert.fail(`Expected a valid example spec: ${result.error}`);
+  return result.spec;
+}

@@ -41,31 +41,23 @@ test("design audit catches transcript height and prose-heavy tables", () => {
       c: { type: "List", props: { items: ["1", "2", "3", "4", "5", "6", "7", "8"] }, children: [] },
     },
   };
-  const validated = validateSpec(spec);
-  assert.equal(validated.ok, true);
-  if (!validated.ok) return;
-  const lines = renderSpec(validated.spec, 80, ansiTheme);
-  const findings = auditDesign(validated.spec, lines, 80);
+  const validatedSpec = requireValidSpec(spec);
+  const lines = renderSpec(validatedSpec, 80, ansiTheme);
+  const findingCodes = auditDesign(validatedSpec, lines, 80).map(({ code }) => code);
 
-  assert.ok(findings.some((finding) => finding.code === "height-budget"));
-  assert.ok(findings.some((finding) => finding.code === "table-prose"));
-  assert.ok(findings.some((finding) => finding.code === "long-list"));
+  assert.deepEqual([...new Set(findingCodes)].sort(), ["height-budget", "long-list", "table-prose"]);
 });
 
 test("design audit accepts a compact status card", () => {
-  const validated = validateSpec(usefulSpec);
-  assert.equal(validated.ok, true);
-  if (!validated.ok) return;
-  const lines = renderSpec(validated.spec, 80, ansiTheme);
+  const validatedSpec = requireValidSpec(usefulSpec);
+  const lines = renderSpec(validatedSpec, 80, ansiTheme);
 
-  assert.deepEqual(auditDesign(validated.spec, lines, 80), []);
+  assert.deepEqual(auditDesign(validatedSpec, lines, 80), []);
 });
 
 test("snapshot renderer creates inspectable SVG and PNG artifacts", async () => {
-  const validated = validateSpec(usefulSpec);
-  assert.equal(validated.ok, true);
-  if (!validated.ok) return;
-  const lines = renderSpec(validated.spec, 60, ansiTheme);
+  const validatedSpec = requireValidSpec(usefulSpec);
+  const lines = renderSpec(validatedSpec, 60, ansiTheme);
   const svg = renderSnapshotSvg(lines, { columns: 60, title: "Deployment <prod>" });
   const png = await renderSnapshotPng(lines, { columns: 60, title: "Deployment" });
 
@@ -76,7 +68,7 @@ test("snapshot renderer creates inspectable SVG and PNG artifacts", async () => 
   assert.deepEqual([...png.subarray(0, 8)], [137, 80, 78, 71, 13, 10, 26, 10]);
 });
 
-test("developer CLI documents and executes the complete feedback loop", async () => {
+test("developer CLI writes text, PNG, and audit report outputs", async () => {
   const directory = await mkdtemp(join(tmpdir(), "json-render-pi-"));
   const specPath = join(directory, "spec.json");
   const asciiPath = join(directory, "preview.txt");
@@ -110,3 +102,9 @@ test("developer CLI documents and executes the complete feedback loop", async ()
   assert.equal(report.valid, true);
   assert.deepEqual(report.findings, []);
 });
+
+function requireValidSpec(input: unknown) {
+  const result = validateSpec(input);
+  if (!result.ok) assert.fail(`Expected a valid spec: ${result.error}`);
+  return result.spec;
+}
