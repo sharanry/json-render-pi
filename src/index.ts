@@ -45,9 +45,7 @@ export default function jsonRenderPi(pi: ExtensionAPI) {
     },
     renderCall(args, theme) {
       const title = typeof args.title === "string" && args.title.trim() ? args.title : "json-render UI";
-      return new StaticLines([
-        `${theme.fg("dim", "json ui")}${theme.fg("muted", ` · ${title}`)}`,
-      ]);
+      return new StaticLines([theme.fg("muted", title)]);
     },
     renderResult(result, _options, theme) {
       const details = result.details as JsonRenderResultDetails | undefined;
