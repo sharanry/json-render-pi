@@ -1,22 +1,51 @@
 {
   "name": "json-render-pi",
   "version": "0.1.0",
-  "private": true,
   "description": "A Pi TUI adapter for json-render Ink specs.",
   "license": "MIT",
   "type": "module",
   "keywords": [
     "pi-package",
     "json-render",
-    "pi-extension"
+    "pi-extension",
+    "generative-ui",
+    "terminal-ui"
   ],
+  "author": {
+    "name": "Sharan Yalburgi",
+    "email": "sharanyalburgi@gmail.com",
+    "url": "https://github.com/sharanry"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sharanry/json-render-pi.git"
+  },
+  "homepage": "https://github.com/sharanry/json-render-pi#readme",
+  "bugs": {
+    "url": "https://github.com/sharanry/json-render-pi/issues"
+  },
+  "files": [
+    "src",
+    "skills",
+    "examples",
+    "docs/images",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "pi": {
     "extensions": [
       "./src/index.ts"
     ],
     "skills": [
       "./skills"
-    ]
+    ],
+    "image": "https://raw.githubusercontent.com/sharanry/json-render-pi/main/docs/images/deployment-status.png"
   },
   "scripts": {
     "test": "node --import tsx --test",
