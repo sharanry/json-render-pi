@@ -158,15 +158,18 @@ export const jsonRenderSpecSchema = z.strictObject({
   elements: z.record(z.string(), jsonRenderElementSchema),
 });
 
-const renderJsonUiInputSchema = z.strictObject({
-  spec: jsonRenderSpecSchema.describe("A constrained, read-only json-render terminal specification."),
-  title: z.string().min(1).max(80).optional().describe("A concise label for the rendered UI."),
-});
-
-/** Exact JSON schema exposed to the model by Pi's tool definition. */
-export const renderJsonUiParameters = Type.Unsafe<z.infer<typeof renderJsonUiInputSchema>>(
-  z.toJSONSchema(renderJsonUiInputSchema, { target: "draft-7" }),
-);
+/**
+ * Tool parameters intentionally leave `spec` structurally open. Pi validates tool
+ * arguments before execute() and flattens nested union failures into misleading
+ * `spec.elements` errors. The Zod schema below remains the single source of truth
+ * and produces path-aware errors from validateSpec() at runtime.
+ */
+export const renderJsonUiParameters = Type.Object({
+  spec: Type.Unknown({
+    description: "A constrained, read-only json-render specification. Validated at runtime for precise element, property, index, and limit errors.",
+  }),
+  title: Type.Optional(Type.String({ minLength: 1, maxLength: 80, description: "A concise label for the rendered UI." })),
+}, { additionalProperties: false });
 
 export type JsonRenderElement = z.infer<typeof jsonRenderElementSchema>;
 export type JsonRenderSpec = z.infer<typeof jsonRenderSpecSchema>;

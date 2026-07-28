@@ -4,7 +4,7 @@ import { Check } from "typebox/value";
 
 import { renderJsonUiParameters } from "../src/spec.ts";
 
-test("tool schema exposes the constrained component contracts to the model", () => {
+test("tool schema defers spec validation to the path-aware runtime validator", () => {
   const valid = {
     title: "Build",
     spec: {
@@ -35,6 +35,8 @@ test("tool schema exposes the constrained component contracts to the model", () 
   };
 
   assert.equal(Check(renderJsonUiParameters, valid), true);
-  assert.equal(Check(renderJsonUiParameters, malformed), false);
+  assert.equal(Check(renderJsonUiParameters, malformed), true);
+  assert.equal(Check(renderJsonUiParameters, { title: "Missing spec" }), false);
+  assert.match(JSON.stringify(renderJsonUiParameters), /validated at runtime/i);
   assert.doesNotMatch(JSON.stringify(renderJsonUiParameters), /TextInput|Select|ConfirmInput|Tabs/);
 });

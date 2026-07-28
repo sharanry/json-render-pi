@@ -28,6 +28,29 @@ test("validateSpec accepts a constrained JSON Render element tree", () => {
   assert.equal(spec.root, "layout");
 });
 
+test("validateSpec reports the exact nested path and limit", () => {
+  const result = validateSpec({
+    root: "card",
+    elements: {
+      card: { type: "Card", props: {}, children: ["phases"] },
+      phases: {
+        type: "Table",
+        props: {
+          columns: [{ header: "Focus", key: "focus", width: 62 }],
+          rows: [],
+        },
+        children: [],
+      },
+    },
+  });
+
+  assert.equal(result.ok, false);
+  if (!result.ok) {
+    assert.match(result.error, /Element "phases" \(Table\) props\.columns\.0\.width/);
+    assert.match(result.error, /<=60/);
+  }
+});
+
 test("validateSpec reports missing child references", () => {
   const result = validateSpec({
     root: "layout",
