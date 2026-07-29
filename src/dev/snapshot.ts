@@ -1,7 +1,7 @@
 import { Resvg } from "@resvg/resvg-js";
 import { visibleWidth } from "@earendil-works/pi-tui";
 
-import type { JsonRenderTheme } from "../renderer.ts";
+export { ansiTheme, plainTheme } from "./theme.ts";
 
 export interface SnapshotOptions {
   columns: number;
@@ -21,36 +21,6 @@ const palette = {
   success: "#4ade80",
   warning: "#facc15",
   error: "#fb7185",
-};
-
-function foreground(hex: string, text: string): string {
-  const [red, green, blue] = hex.slice(1).match(/../g)!.map((value) => Number.parseInt(value, 16));
-  return `\x1b[38;2;${red};${green};${blue}m${text}\x1b[39m`;
-}
-
-/** ANSI theme used by the standalone terminal preview and snapshot parser. */
-export const ansiTheme: JsonRenderTheme = {
-  accent: (text) => foreground(palette.accent, text),
-  text: (text) => foreground(palette.text, text),
-  muted: (text) => foreground(palette.muted, text),
-  dim: (text) => foreground(palette.dim, text),
-  success: (text) => foreground(palette.success, text),
-  warning: (text) => foreground(palette.warning, text),
-  error: (text) => foreground(palette.error, text),
-  bold: (text) => `\x1b[1m${text}\x1b[22m`,
-  italic: (text) => `\x1b[3m${text}\x1b[23m`,
-};
-
-export const plainTheme: JsonRenderTheme = {
-  accent: (text) => text,
-  text: (text) => text,
-  muted: (text) => text,
-  dim: (text) => text,
-  success: (text) => text,
-  warning: (text) => text,
-  error: (text) => text,
-  bold: (text) => text,
-  italic: (text) => text,
 };
 
 export function renderSnapshotSvg(lines: readonly string[], options: SnapshotOptions): string {

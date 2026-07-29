@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { execFile } from "node:child_process";
-import { mkdtemp, readFile, writeFile } from "node:fs/promises";
+import { access, mkdtemp, readFile, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { promisify } from "node:util";
@@ -66,6 +66,40 @@ test("snapshot renderer creates inspectable SVG and PNG artifacts", async () => 
   assert.doesNotMatch(svg, /\x1b/);
   assert.match(svg, /data-cell="59"[^>]*>│<\/text>/);
   assert.deepEqual([...png.subarray(0, 8)], [137, 80, 78, 71, 13, 10, 26, 10]);
+});
+
+test("Storybook exposes every example with adjustable terminal widths", async () => {
+  const packageJson = JSON.parse(await readFile("package.json", "utf8"));
+  assert.equal(packageJson.scripts.storybook, "storybook dev -p 6006");
+  assert.equal(packageJson.scripts["storybook:build"], "storybook build");
+
+  await access(".storybook/main.ts");
+  await access(".storybook/preview.ts");
+  const stories = await readFile("stories/json-ui.stories.ts", "utf8");
+  for (const example of ["deployment-status", "agent-plan", "detailed-agent-plan"]) {
+    assert.match(stories, new RegExp(`examples/${example}\\.json`));
+  }
+  assert.match(stories, /width.*control.*range/s);
+  assert.match(stories, /renderSpec/);
+  assert.match(stories, /validateSpec/);
+
+  const renderer = await readFile("src/renderer.ts", "utf8");
+  assert.doesNotMatch(renderer, /from "@earendil-works\/pi-tui"/);
+  assert.match(renderer, /from "@earendil-works\/pi-tui\/dist\/utils\.js"/);
+});
+
+test("Storybook includes a configurable component dashboard", async () => {
+  const playground = await readFile("stories/dashboard.stories.ts", "utf8");
+  for (const component of ["Text", "Heading", "Divider", "Badge", "ProgressBar", "Sparkline", "BarChart", "Table", "List", "KeyValue", "StatusLine", "Metric", "Callout"]) {
+    assert.match(playground, new RegExp(`type: \\"${component}\\"`));
+  }
+  assert.match(playground, /Add component/);
+  assert.match(playground, /Remove/);
+  assert.match(playground, /Move up/);
+  assert.match(playground, /Move down/);
+  assert.match(playground, /width.*control.*range/s);
+  assert.match(playground, /validateSpec/);
+  assert.match(playground, /renderSpec/);
 });
 
 test("developer CLI writes text, PNG, and audit report outputs", async () => {

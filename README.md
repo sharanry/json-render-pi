@@ -38,6 +38,19 @@ conditions stay organized even in a detailed plan.
 
 [View the source spec](examples/detailed-agent-plan.json)
 
+## Preview and develop renderings
+
+Run the included Storybook to browse every curated example with a live terminal-width control:
+
+```bash
+npm install
+npm run storybook
+```
+
+Open `http://localhost:6006`, choose an example in the sidebar, and adjust **Width** in the Controls panel. Open **Configurable dashboard** to add any supported leaf component, edit its props as JSON, reorder or remove it, and change terminal width with a live slider. The previews use the production validator and renderer, so wrapping and validation behavior match the Pi extension.
+
+For a production-static preview, run `npm run storybook:build`; output is written to `storybook-static/`.
+
 ## Built for trustworthy agent communication
 
 - **Easy to scan:** hierarchy, spacing, color, and alignment expose what matters.
