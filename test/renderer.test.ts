@@ -232,6 +232,23 @@ test("gives component types distinct visual signatures and semantic styling", ()
   assert.match(result, /<warning>▲<\/warning> <warning><bold>Watch<\/bold><\/warning>/);
 });
 
+test("defaults to a three-column gap between row elements", () => {
+  const result = renderSpec(
+    {
+      root: "row",
+      elements: {
+        row: { type: "Box", props: { flexDirection: "row" }, children: ["left", "right"] },
+        left: { type: "Text", props: { text: "alpha" }, children: [] },
+        right: { type: "Text", props: { text: "beta" }, children: [] },
+      },
+    },
+    12,
+    theme,
+  );
+
+  assert.equal(result[0], "alpha   beta");
+});
+
 test("renders rows horizontally and fits every line within the requested width", () => {
   const result = renderSpec(
     {
@@ -246,12 +263,12 @@ test("renders rows horizontally and fits every line within the requested width",
         right: { type: "Text", props: { text: "beta" }, children: [] },
       },
     },
-    16,
+    12,
     theme,
   );
 
-  assert.equal(result[0], "alpha      beta");
-  assert.ok(result.every((line) => visibleLength(line) <= 16));
+  assert.equal(result[0], "alpha  beta");
+  assert.ok(result.every((line) => visibleLength(line) <= 12));
 });
 
 test("wraps long content inside a card instead of clipping it", () => {
@@ -296,7 +313,7 @@ test("lays out multi-line row children in stable columns", () => {
     plainTheme,
   );
 
-  assert.deepEqual(result, ["Healthy                Rollout", "12/12                  75%"]);
+  assert.deepEqual(result, ["Healthy              Rollout", "12/12                75%"]);
 });
 
 const plainTheme = {
