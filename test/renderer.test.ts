@@ -246,12 +246,12 @@ test("renders rows horizontally and fits every line within the requested width",
         right: { type: "Text", props: { text: "beta" }, children: [] },
       },
     },
-    12,
+    16,
     theme,
   );
 
-  assert.equal(result[0], "alpha  beta");
-  assert.ok(result.every((line) => visibleLength(line) <= 12));
+  assert.equal(result[0], "alpha      beta");
+  assert.ok(result.every((line) => visibleLength(line) <= 16));
 });
 
 test("wraps long content inside a card instead of clipping it", () => {
@@ -296,7 +296,7 @@ test("lays out multi-line row children in stable columns", () => {
     plainTheme,
   );
 
-  assert.deepEqual(result, ["Healthy              Rollout", "12/12                75%"]);
+  assert.deepEqual(result, ["Healthy                Rollout", "12/12                  75%"]);
 });
 
 const plainTheme = {

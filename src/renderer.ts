@@ -61,7 +61,7 @@ function renderBox(
   stack: Set<string>,
 ): string[] {
   const padding = positiveInt(element.props.padding, 0);
-  const gap = positiveInt(element.props.gap, 0);
+  const gap = positiveInt(element.props.gap, 0) * 3;
   const contentWidth = Math.max(1, width - padding * 2);
 
   if (element.props.flexDirection === "row") {
