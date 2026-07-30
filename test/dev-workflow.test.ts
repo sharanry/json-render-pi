@@ -84,8 +84,8 @@ test("Storybook exposes every example with adjustable terminal widths", async ()
   assert.match(stories, /validateSpec/);
 
   const renderer = await readFile("src/renderer.ts", "utf8");
-  assert.doesNotMatch(renderer, /from "@earendil-works\/pi-tui"/);
-  assert.match(renderer, /from "@earendil-works\/pi-tui\/dist\/utils\.js"/);
+  assert.match(renderer, /from "\.\/ansi\.ts";/);
+  assert.doesNotMatch(renderer, /@earendil-works\/pi-tui/);
 });
 
 test("Storybook includes a configurable component dashboard", async () => {

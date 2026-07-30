@@ -2,7 +2,7 @@ import {
   truncateToWidth,
   visibleWidth,
   wrapTextWithAnsi,
-} from "@earendil-works/pi-tui/dist/utils.js";
+} from "./ansi.ts";
 
 import type { JsonRenderElement, JsonRenderSpec } from "./spec.ts";
 
