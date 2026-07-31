@@ -159,14 +159,25 @@ export const jsonRenderSpecSchema = z.strictObject({
 });
 
 /**
- * Tool parameters intentionally leave `spec` structurally open. Pi validates tool
- * arguments before execute() and flattens nested union failures into misleading
- * `spec.elements` errors. The Zod schema below remains the single source of truth
- * and produces path-aware errors from validateSpec() at runtime.
+ * Expose the normalized graph envelope to the model and validate it at the tool
+ * boundary. Element values stay open because Pi flattens nested union failures
+ * into misleading `spec.elements` errors; validateSpec() remains the source of
+ * precise component, property, index, and limit diagnostics at runtime.
  */
 export const renderJsonUiParameters = Type.Object({
-  spec: Type.Unknown({
-    description: "A constrained, read-only json-render specification. Validated at runtime for precise element, property, index, and limit errors.",
+  spec: Type.Object({
+    root: Type.String({
+      minLength: 1,
+      description: "The ID of the root Box or Card in spec.elements.",
+    }),
+    elements: Type.Record(Type.String(), Type.Unknown({
+      description: "A JSON UI element with type, props, and string child IDs. Component details are validated at runtime.",
+    }), {
+      description: "A map of element IDs to JSON UI elements. Container children reference IDs in this map.",
+    }),
+  }, {
+    additionalProperties: false,
+    description: "A normalized JSON UI graph with a root element ID and an elements map; never nest element objects in children.",
   }),
   title: Type.Optional(Type.String({ minLength: 1, maxLength: 80, description: "A concise label for the rendered UI." })),
 }, { additionalProperties: false });

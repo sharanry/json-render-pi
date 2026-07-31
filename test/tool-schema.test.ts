@@ -4,7 +4,7 @@ import { Check } from "typebox/value";
 
 import { renderJsonUiParameters } from "../src/spec.ts";
 
-test("tool schema defers spec validation to the path-aware runtime validator", () => {
+test("tool schema enforces the graph envelope and defers element validation", () => {
   const valid = {
     title: "Build",
     spec: {
@@ -36,7 +36,13 @@ test("tool schema defers spec validation to the path-aware runtime validator", (
 
   assert.equal(Check(renderJsonUiParameters, valid), true);
   assert.equal(Check(renderJsonUiParameters, malformed), true);
+  assert.equal(Check(renderJsonUiParameters, {
+    title: "Nested tree",
+    spec: { type: "Card", props: {}, children: [] },
+  }), false);
   assert.equal(Check(renderJsonUiParameters, { title: "Missing spec" }), false);
+  assert.equal(Check(renderJsonUiParameters, { spec: { root: "card" } }), false);
+  assert.match(JSON.stringify(renderJsonUiParameters), /normalized JSON UI graph/i);
   assert.match(JSON.stringify(renderJsonUiParameters), /validated at runtime/i);
   assert.doesNotMatch(JSON.stringify(renderJsonUiParameters), /TextInput|Select|ConfirmInput|Tabs/);
 });

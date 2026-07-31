@@ -1,5 +1,5 @@
 import type { ExtensionAPI, Theme } from "@earendil-works/pi-coding-agent";
-import { truncateToWidth, type Component } from "@earendil-works/pi-tui";
+import { Text, truncateToWidth, type Component } from "@earendil-works/pi-tui";
 import { renderSpec, type JsonRenderTheme } from "./renderer.ts";
 import {
   renderJsonUiParameters,
@@ -29,6 +29,7 @@ export default function jsonRenderPi(pi: ExtensionAPI) {
     promptSnippet: "Render a safe, read-only json-render Ink specification in Pi's terminal transcript",
     promptGuidelines: [
       "Use render_json_ui when the user asks for a compact terminal dashboard, status card, table, chart, or other visual summary.",
+      "Pass render_json_ui a normalized spec shaped as { root: string, elements: Record<string, element> }; container children are element ID strings, never nested element objects.",
       "Use render_json_ui only with a complete spec that matches its exact schema; only Box and Card may have children, while leaf content belongs in props.",
       "Keep render_json_ui layouts compact: prefer one Card, column layout, lists via props.items, and tables with descriptor columns plus object rows.",
       "Do not put secrets in render_json_ui specs; its output is saved in the Pi session transcript.",
@@ -47,7 +48,16 @@ export default function jsonRenderPi(pi: ExtensionAPI) {
       const title = typeof args.title === "string" && args.title.trim() ? args.title : "json-render UI";
       return new StaticLines([theme.fg("muted", title)]);
     },
-    renderResult(result, _options, theme) {
+    renderResult(result, _options, theme, context) {
+      if (context.isError) {
+        const message = result.content
+          .filter((item): item is Extract<typeof item, { type: "text" }> => item.type === "text")
+          .map((item) => item.text)
+          .join("\n")
+          .trim();
+        return new Text(theme.fg("error", message || "JSON UI rendering failed."), 0, 0);
+      }
+
       const details = result.details as JsonRenderResultDetails | undefined;
       if (!details?.spec) return new StaticLines([theme.fg("warning", "No json-render spec was returned.")]);
       return new JsonRenderView(details.spec, toJsonRenderTheme(theme));

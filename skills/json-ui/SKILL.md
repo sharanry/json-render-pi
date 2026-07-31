@@ -17,8 +17,11 @@ include secrets because tool results are stored in the session transcript.
 
 ## Hard layout rules
 
-- The root must be `Box` or `Card`.
-- Only `Box` and `Card` may have children. Every other component uses
+- `spec` is always a normalized graph: `{ "root": "element-id", "elements": { ... } }`.
+- `spec.root` is a string ID whose element must be a `Box` or `Card`.
+- `spec.elements` maps IDs to elements. A container's `children` are string IDs
+  in that map—never nested element objects.
+- Only `Box` and `Card` may have child IDs. Every other component uses
   `"children": []` and receives content through `props`.
 - Prefer one outer `Card`, at most 5–6 sections, and fewer than 20 elements.
 - Use a column `Box` for normal layout. A row `Box` is only for 2–4 compact
@@ -31,7 +34,8 @@ include secrets because tool results are stored in the session transcript.
 
 ## Supported contracts
 
-Every element has exactly `type`, `props`, and `children`.
+Every element in `spec.elements` has exactly `type`, `props`, and `children`.
+Container `children` arrays contain IDs; leaf `children` arrays are empty.
 
 - `Box`: `{ flexDirection?: "row"|"column", padding?: 0..2, gap?: 0..2 }`
 - `Card`: `{ title?: string, padding?: 0..2 }`
@@ -53,6 +57,34 @@ Colors are limited to `red`, `green`, `yellow`, `blue`, `magenta`, `cyan`,
 `white`, and `gray`.
 
 ## Correct patterns
+
+Always send the complete graph envelope. This is a valid, copyable spec:
+
+```json
+{
+  "root": "card",
+  "elements": {
+    "card": {
+      "type": "Card",
+      "props": { "title": "Deployment status", "padding": 1 },
+      "children": ["status", "steps"]
+    },
+    "status": {
+      "type": "StatusLine",
+      "props": { "text": "Production is healthy", "status": "success" },
+      "children": []
+    },
+    "steps": {
+      "type": "List",
+      "props": { "items": ["Monitor rollout", "Verify metrics"], "ordered": true },
+      "children": []
+    }
+  }
+}
+```
+
+Do not pass a nested tree such as `{ "type": "Card", "children": [{ ... }] }`.
+The tool requires `root` plus `elements`, and container children must be IDs.
 
 A list stores strings in `props.items`; it never has item children:
 
@@ -113,7 +145,7 @@ remain useful at 80 columns.
 ## Workflow
 
 1. Summarize the information into a compact visual hierarchy.
-2. Build one complete spec; verify every child id exists exactly once.
+2. Build one complete `{ root, elements }` spec; verify every child ID exists exactly once.
 3. Check every component against the contracts above.
 4. Call `render_json_ui` with the spec and a short title.
 5. Follow it with only an essential caveat or next action.
